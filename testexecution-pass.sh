@@ -6,9 +6,9 @@ JIRA_BASE_URL=https://your-jira-instance.com
 # Set the API endpoint for updating test execution
 XRAY_API_ENDPOINT=/rest/raven/1.0/api/testexec
 
-# Set the username and password for the Jira user
-JIRA_USERNAME=your-username
-JIRA_PASSWORD=your-password
+# Set the default username and password for the Jira user
+JIRA_USERNAME=${JIRA_USERNAME:-your-username}
+JIRA_PASSWORD=${JIRA_PASSWORD:-your-password}
 
 # Initialize variables for the test ID and test execution status
 TEST_ID=""
