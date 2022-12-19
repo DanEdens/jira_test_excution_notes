@@ -10,7 +10,11 @@ XRAY_API_ENDPOINT=/rest/raven/1.0/api/testexec
 JIRA_USERNAME=your-username
 JIRA_PASSWORD=your-password
 
-# Parse the test ID from the command line arguments
+# Initialize variables for the test ID and test execution status
+TEST_ID=""
+STATUS=""
+
+# Parse the command line arguments
 while [[ $# -gt 0 ]]
 do
 key="$1"
@@ -21,13 +25,25 @@ case $key in
     shift # past argument
     shift # past value
     ;;
+    --pass)
+    STATUS="PASS"
+    shift # past argument
+    ;;
+    --fail)
+    STATUS="FAIL"
+    shift # past argument
+    ;;
+    --executing)
+    STATUS="EXECUTING"
+    shift # past argument
+    ;;
     *)    # unknown option
     shift # past argument
     ;;
 esac
 done
 
-# Set the test execution status to "PASS"
-curl -X PATCH -u "$JIRA_USERNAME:$JIRA_PASSWORD" "$JIRA_BASE_URL$XRAY_API_ENDPOINT/$TEST_ID" -H "Content-Type: application/json" -d "{\"status\": \"PASS\"}"
+# Set the test execution status
+curl -X PATCH -u "$JIRA_USERNAME:$JIRA_PASSWORD" "$JIRA_BASE_URL$XRAY_API_ENDPOINT/$TEST_ID" -H "Content-Type: application/json" -d "{\"status\": \"$STATUS\"}"
 
-echo "Test execution status updated to PASS for test with ID $TEST_ID"
+echo "Test execution status updated to $STATUS for test with ID $TEST_ID"
