@@ -1,0 +1,374 @@
+Certainly! Here is a bash script that uses environment variables for parameter defaults and handles the various Jira REST API operations using argument flags:
+
+Copy code
+#!/bin/bash
+
+# Set the base URL for the Jira instance
+JIRA_BASE_URL=https://your-jira-instance.com
+
+# Set the default username and password for the Jira user
+JIRA_USERNAME=${JIRA_USERNAME:-your-username}
+JIRA_PASSWORD=${JIRA_PASSWORD:-your-password}
+
+# Parse the command line arguments
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    --create)
+    # Set the API endpoint for creating a new ticket
+    JIRA_API_ENDPOINT=/rest/api/2/issue
+
+    # Read the ticket details from stdin
+    TICKET_DETAILS=$(cat)
+
+    # Create the ticket
+    curl -u "$JIRA_USERNAME:$JIRA_PASSWORD" -X POST -H "Content-Type: application/json" -d "$TICKET_DETAILS" "$JIRA_BASE_URL$JIRA_API_ENDPOINT"
+    ;;
+    --update)
+    # Set the API endpoint for updating a ticket
+    JIRA_API_ENDPOINT=/rest/api/2/issue
+
+    # Parse the ticket ID from the command line arguments
+    TICKET_ID="$2"
+    shift # past argument
+    shift # past value
+
+    # Read the updated ticket details from stdin
+    TICKET_DETAILS=$(cat)
+
+    # Update the ticket
+    curl -u "$JIRA_USERNAME:$JIRA_PASSWORD" -X PUT -H "Content-Type: application/json" -d "$TICKET_DETAILS" "$JIRA_BASE_URL$JIRA_API_ENDPOINT/$TICKET_ID"
+    ;;
+    --assign)
+    # Set the API endpoint for assigning a ticket
+    JIRA_API_ENDPOINT=/rest/api/2/issue
+
+    # Parse the ticket ID and username from the command line arguments
+    TICKET_ID="$2"
+    USERNAME="$3"
+    shift # past argument
+    shift # past value
+    shift # past value
+
+    # Assign the ticket to the user
+    curl -u "$JIRA_USERNAME:
+
+
+Dan Edens
+continue at that line
+
+Certainly! Here is the rest of the bash script:
+
+Copy code
+    # Assign the ticket to the user
+    curl -u "$JIRA_USERNAME:$JIRA_PASSWORD" -X PUT -H "Content-Type: application/json" -d "{\"name\": \"$USERNAME\"}" "$JIRA_BASE_URL$JIRA_API_ENDPOINT/$TICKET_ID/assignee"
+    ;;
+    --comment)
+    # Set the API endpoint for adding a comment to a ticket
+    JIRA_API_ENDPOINT=/rest/api/2/issue
+
+    # Parse the ticket ID from the command line arguments
+    TICKET_ID="$2"
+    shift # past argument
+    shift # past value
+
+    # Read the comment text from stdin
+    COMMENT_TEXT=$(cat)
+
+    # Add the comment to the ticket
+    curl -u "$JIRA_USERNAME:$JIRA_PASSWORD" -X POST -H "Content-Type: application/json" -d "{\"body\": \"$COMMENT_TEXT\"}" "$JIRA_BASE_URL$JIRA_API_ENDPOINT/$TICKET_ID/comment"
+    ;;
+    --worklog)
+    # Set the API endpoint for adding a worklog to a ticket
+    JIRA_API_ENDPOINT=/rest/api/2/issue
+
+    # Parse the ticket ID from the command line arguments
+    TICKET_ID="$2"
+    shift # past argument
+    shift # past value
+
+    # Read the worklog details from stdin
+    WORKLOG_DETAILS=$(cat)
+
+    # Add the worklog to the ticket
+    curl -u "$JIRA_USERNAME:$JIRA_PASSWORD" -X POST -H "Content-Type: application/json" -d "$WORKLOG_DETAILS" "$JIRA_B
+
+
+Dan Edens
+continue at that line
+
+Certainly! Here is the rest of the bash script:
+
+Copy code
+    # Add the worklog to the ticket
+    curl -u "$JIRA_USERNAME:$JIRA_PASSWORD" -X POST -H "Content-Type: application/json" -d "$WORKLOG_DETAILS" "$JIRA_BASE_URL$JIRA_API_ENDPOINT/$TICKET_ID/worklog"
+    ;;
+    *)    # unknown option
+    shift # past argument
+    ;;
+esac
+done
+To use this script, you will need to replace https://your-jira-instance.com with the base URL for your Jira instance, and your-username and your-password with the username and password of a Jira user who has the necessary permissions for the desired API operations.
+
+You can then run the script with the appropriate argument flag and any necessary parameters, and provide the required input (e.g. ticket details, comment text, etc.) via stdin. For example:
+
+Copy code
+./jira-api.sh --create < ticket-details.json
+Copy code
+./jira-api.sh --update TICKET-123 < updated-ticket-details.json
+Copy code
+./jira-api.sh --assign TICKET-123 user@example.com
+Copy code
+echo "This is a new comment" | ./jira-api.sh --comment TICKET-123
+Copy code
+cat worklog-details.json | ./jira-api.sh --worklog TICKET-123
+I hope this helps! Let me know if you have any questions.
+
+
+
+Dan Edens
+can you write a readme for a project that Includes all the code we've talked about, assume I built it out to be equal across scripts to the one you just showed me
+
+Certainly! Here is a sample readme for a project that includes all of the code we've discussed:
+
+Jira REST API scripts
+This repository contains a collection of scripts for interacting with the Jira REST API. The scripts are written in bash and allow you to perform various operations, including creating and updating tickets, assigning tickets to users, adding comments and worklogs, and setting parent/child links between tickets.
+
+Prerequisites
+curl
+jq (optional, only needed for the set-parent-child-link.sh script)
+Usage
+Each script can be run with the appropriate argument flag and any necessary parameters. Input (e.g. ticket details, comment text, etc.) can be provided via stdin.
+
+create-ticket.sh
+Creates a new ticket in Jira.
+
+Copy code
+Usage: create-ticket.sh [options]
+
+Options:
+  --username <username>  Jira username (defaults to value of $JIRA_USERNAME)
+  --password <password>  Jira password (defaults to value of $JIRA_PASSWORD)
+Example:
+
+Copy code
+cat ticket-details.json | ./create-ticket.sh --username user@example.com --password secret
+update-ticket.sh
+Updates an existing ticket in Jira.
+
+Copy code
+Usage: update-ticket.sh [options] <ticket_id>
+
+Options:
+  --username <username>  Jira username (defaults to value of $JIRA_USERNAME)
+  --password <password>  Jira password (defaults to value of $JIRA_PASSWORD)
+Example:
+
+Copy code
+cat updated-ticket-details.json | ./update-ticket.sh TICKET-123 --username user@example.com --password secret
+assign-ticket.sh
+Assigns a ticket in Jira to a user.
+
+Copy code
+Usage: assign-ticket.sh [options] <ticket_id> <username>
+
+Options:
+  --username <username>  Jira username (defaults to value of $JIRA_USERNAME)
+  --password <password>  Jira password (defaults to value of $JIRA_PASSWORD)
+Example:
+
+Copy code
+./assign-ticket.sh TICKET-123 user@example.com --username user@example.com --password secret
+add-comment.sh
+Adds a comment to a ticket in Jira.
+
+``
+
+
+
+Dan Edens
+continue from that line
+
+Certainly! Here is the rest of the sample readme:
+
+Copy code
+Usage: add-comment.sh [options] <ticket_id>
+
+Options:
+  --username <username>  Jira username (defaults to value of $JIRA_USERNAME)
+  --password <password>  Jira password (defaults to value of $JIRA_PASSWORD)
+Example:
+
+Copy code
+echo "This is a new comment" | ./add-comment.sh TICKET-123 --username user@example.com --password secret
+add-worklog.sh
+Adds a worklog to a ticket in Jira.
+
+Copy code
+Usage: add-worklog.sh [options] <ticket_id>
+
+Options:
+  --username <username>  Jira username (defaults to value of $JIRA_USERNAME)
+  --password <password>  Jira password (defaults to value of $JIRA_PASSWORD)
+Example:
+
+Copy code
+cat worklog-details.json | ./add-worklog.sh TICKET-123 --username user@example.com --password secret
+set-parent-child-link.sh
+Sets a parent/child link between two tickets in Jira.
+
+Copy code
+Usage: set-parent-child-link.sh [options] <parent_id> <child_id>
+
+Options:
+  --username <username>  Jira username (defaults to value of $JIRA_USERNAME)
+  --password <password>  Jira password (defaults to value of $JIRA_PASSWORD)
+Example:
+
+Copy code
+./set-parent-child-link.sh PARENT-123 CHILD-456 --username user@example.com --password secret
+Environment variables
+You can set the following environment variables to provide default values for the script options:
+
+JIRA_USERNAME: default value for the --username option
+JIRA_PASSWORD: default value for the --password option
+License
+These scripts are licensed under the MIT License. See the LICENSE file for details.
+
+Disclaimer
+These scripts are provided as-is, without any warranty or support. Use them at your own risk.
+
+
+
+Dan Edens
+can you give me all these same functions in a single python script?
+
+Certainly! Here is a single Python script that includes all of the functions we discussed earlier for interacting with the Jira REST API:
+
+Copy code
+import json
+import sys
+import getopt
+import requests
+
+# Set the base URL for the Jira instance
+JIRA_BASE_URL = "https://your-jira-instance.com"
+
+def create_ticket(username, password, ticket_details):
+    """Creates a new ticket in Jira."""
+    api_endpoint = "/rest/api/2/issue"
+    url = f"{JIRA_BASE_URL}{api_endpoint}"
+    headers = {
+        "Content-Type": "application/json",
+    }
+    auth = (username, password)
+    response = requests.post(url, headers=headers, auth=auth, json=ticket_details)
+    if response.status_code != 201:
+        raise Exception(f"Error creating ticket: {response.text}")
+
+def update_ticket(username, password, ticket_id, updated_ticket_details):
+    """Updates an existing ticket in Jira."""
+    api_endpoint = f"/rest/api/2/issue/{ticket_id}"
+    url = f"{JIRA_BASE_URL}{api_endpoint}"
+    headers = {
+        "Content-Type": "application/json",
+    }
+    auth = (username, password)
+    response = requests.put(url, headers=headers, auth=auth, json=updated_ticket_details)
+    if response.status_code != 200:
+        raise Exception(f"Error updating ticket: {response.text}")
+
+def assign_ticket(username, password, ticket_id, assignee_username):
+    """Assigns a ticket in Jira to a user."""
+    api_endpoint = f"/rest/api/2/issue/{ticket_id}/assignee"
+    url = f"{JIRA_BASE_URL}{api_endpoint}"
+    headers = {
+        "Content-Type": "application/json",
+    }
+    auth = (username, password)
+    assignee = {"name": assignee_username}
+    response = requests.put
+
+
+Dan Edens
+continue from that line
+
+Certainly! Here is the rest of the Python script:
+
+Copy code
+def add_comment(username, password, ticket_id, comment_text):
+    """Adds a comment to a ticket in Jira."""
+    api_endpoint = f"/rest/api/2/issue/{ticket_id}/comment"
+    url = f"{JIRA_BASE_URL}{api_endpoint}"
+    headers = {
+        "Content-Type": "application/json",
+    }
+    auth = (username, password)
+    comment = {"body": comment_text}
+    response = requests.post(url, headers=headers, auth=auth, json=comment)
+    if response.status_code != 201:
+        raise Exception(f"Error adding comment: {response.text}")
+
+def add_worklog(username, password, ticket_id, worklog_details):
+    """Adds a worklog to a ticket in Jira."""
+    api_endpoint = f"/rest/api/2/issue/{ticket_id}/worklog"
+    url = f"{JIRA_BASE_URL}{api_endpoint}"
+    headers = {
+        "Content-Type": "application/json",
+    }
+    auth = (username, password)
+    response = requests.post(url, headers=headers, auth=auth, json=worklog_details)
+    if response.status_code != 201:
+        raise Exception(f"Error adding worklog: {response.text}")
+
+def set_parent_child_link(username, password, parent_id, child_id):
+   
+
+
+Dan Edens
+continue from that line
+
+Certainly! Here is the rest of the Python script:
+
+Copy code
+    """Sets a parent/child link between two tickets in Jira."""
+    api_endpoint = "/rest/api/2/issueLink"
+    url = f"{JIRA_BASE_URL}{api_endpoint}"
+    headers = {
+        "Content-Type": "application/json",
+    }
+    auth = (username, password)
+    link_type = "Relates"
+    link = {
+        "type": {"name": link_type},
+        "inwardIssue": {"key": parent_id},
+        "outwardIssue": {"key": child_id},
+    }
+    response = requests.post(url, headers=headers, auth=auth, json=link)
+    if response.status_code != 201:
+        raise Exception(f"Error setting parent/child link: {response.text}")
+
+def main(argv):
+    # Parse command line arguments
+    try:
+        opts, args = getopt.getopt(argv, "h", ["help", "create", "update=", "assign=", "comment=", "worklog=", "parent=", "child="])
+    except getopt.GetoptError:
+        print("jira-api.py --create | --update <ticket_id> | --assign <ticket_id> <username> | --comment <ticket_id> | --worklog <ticket_id> | --parent <parent_id> --child <child_id>")
+        sys.exit(2)
+
+    # Set default values for the username and password
+    username = os.environ.get("JIRA_USERNAME", "")
+    password = os.environ.get("JIRA_PASSWORD", "")
+
+    # Read input from stdin
+    input_data = sys.stdin.read()
+
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            print("jira-api.py --create | --update <ticket_id> | --assign <ticket_id> <username> | --comment <ticket_id> | --worklog <ticket_id> | --parent <parent_id> --child <child_id>")
+            sys.exit()
+        elif opt == "--create":
+            ticket_details = json.loads(input_data)
+            create_ticket(username, password, ticket_details)

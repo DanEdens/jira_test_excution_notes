@@ -1,0 +1,29 @@
+def set_test_execution_to_pass(test_execution_key: str) -> None:
+    import requests
+
+    # Set the Xray API endpoint URL
+    xray_api_url = "https://your-jira-instance.com/rest/raven/1.0/api"
+
+    # Set the Xray API key
+    xray_api_key = "your-xray-api-key"
+
+    # Set the test execution status to "pass"
+    data = """
+    {
+        "status": "PASS"
+    }
+    """
+
+    # Make the PUT request to update the test execution status
+    response = requests.put(
+        f"{xray_api_url}/testexec/{test_execution_key}/execute",
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Basic {xray_api_key}"
+        },
+        data=data
+    )
+
+    # Check the response status code
+    if response.status_code != 200:
+        raise Exception(f"Failed to update test execution status: {response.text}")
